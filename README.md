@@ -2,7 +2,6 @@
 
 A gamified habit tracker that visualizes your daily consistency as a growing garden. Build streaks, earn XP, and watch your virtual garden flourish.
 
-![Habit Garden Dashboard](./public/screenshot-placeholder.png) *(Note: Replace with actual screenshot before sharing)*
 
 ## 🚀 Features
 
