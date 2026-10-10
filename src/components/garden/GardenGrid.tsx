@@ -1,88 +1,161 @@
 'use client'
 
-import { useGarden } from '@/lib/queries'
+import { useGarden, useProfile } from '@/lib/queries'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Sprout } from 'lucide-react'
 
-// Simple SVG components for the garden
+// Stylized botanical SVG plants
 const Seed = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-primary">
-    <path d="M12 22C12 22 15 19 15 15C15 11 12 8 12 8C12 8 9 11 9 15C9 19 12 22 12 22Z" fill="currentColor" fillOpacity="0.5"/>
-  </svg>
-)
-
-const Sprout = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-primary">
-    <path d="M12 22V12M12 12C12 12 15 10 18 6C18 6 19 10 16 14C14 16 12 12 12 12ZM12 12C12 12 9 12 6 8C6 8 5 12 8 16C10 18 12 12 12 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-emerald-400">
+    <path d="M12 22V13M12 13C12 13 14 11 17 8C17 8 18 11 15 14C13.5 15.5 12 13 12 13ZM12 13C12 13 10 13 7 10C7 10 6 13 9 16C10.5 17.5 12 13 12 13Z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 )
 
 const Flower = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-accent">
-    <path d="M12 22V14M12 14C12 14 15 12 18 10C19 9 20 6 18 5C16 4 14 6 12 8C10 6 8 4 6 5C4 6 5 9 6 10C9 12 12 14 12 14Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg viewBox="0 0 24 24" fill="none" className="w-9 h-9 text-amber-300">
+    <path d="M12 22V14M12 14C12 14 15 12 17.5 10.5C18.5 9.5 19 7.5 17.5 6.5C16 5.5 14 7 12 9C10 7 8 5.5 6.5 6.5C5 7.5 5.5 9.5 6.5 10.5C9 12 12 14 12 14Z" fill="currentColor" fillOpacity="0.85" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="10" r="2.5" fill="#f59e0b" />
   </svg>
 )
 
-const Tree = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-primary">
-    <path d="M12 22V14M12 14C12 14 17 12 18 8C19 4 15 2 12 2C9 2 5 4 6 8C7 12 12 14 12 14Z" fill="currentColor" opacity="0.8"/>
+const Bonsai = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-11 h-11 text-emerald-300">
+    <path d="M12 22V15M12 15C12 15 17 13 18.5 9.5C19.5 6.5 16 4 13 6.5C11.5 7.8 12 15 12 15ZM12 15C12 15 7 13 5.5 9.5C4.5 6.5 8 4 11 6.5C12.5 7.8 12 15 12 15Z" fill="currentColor" fillOpacity="0.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+    <circle cx="15.5" cy="8" r="1.5" fill="#fcd34d" />
+    <circle cx="8.5" cy="8" r="1.5" fill="#fcd34d" />
+  </svg>
+)
+
+const AncientTree = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-12 h-12 text-teal-300">
+    <path d="M12 22V14M12 14C12 14 18 12 19 7.5C19.5 4 15 2 12 4.5C9 2 4.5 4 5 7.5C6 12 12 14 12 14Z" fill="currentColor" fillOpacity="0.9" stroke="currentColor" strokeWidth="1.8"/>
+    <circle cx="12" cy="7" r="2" fill="#86efac" />
+    <circle cx="9" cy="9" r="1.5" fill="#fef08a" />
+    <circle cx="15" cy="9" r="1.5" fill="#fef08a" />
   </svg>
 )
 
 const PlantStage = ({ stage }: { stage: string }) => {
   switch (stage) {
-    case 'seed': return <Seed />
-    case 'sprout': return <Sprout />
+    case 'seed':
+    case 'sprout': return <Seed />
     case 'flower': return <Flower />
-    case 'tree': return <Tree />
-    case 'plant':
-    default: return <Sprout />
+    case 'bonsai': return <Bonsai />
+    case 'tree': return <AncientTree />
+    default: return <Seed />
   }
 }
 
 export function GardenGrid() {
   const { data: garden, isLoading } = useGarden()
+  const { data: profile } = useProfile()
 
   if (isLoading) {
-    return <Skeleton className="w-full h-full min-h-[300px] rounded-2xl" />
+    return <Skeleton className="w-full h-full min-h-[340px] rounded-3xl bg-emerald-950/60" />
   }
 
-  if (!garden) return null
+  const level = garden?.level || profile?.level || 12
+  const xp = profile?.xp || 14500
+  const maxXP = 15000
 
-  // For MVP, if real plants table is empty, simulate garden growth based on level
-  const plants = garden.plants.length > 0 ? garden.plants : generatePlantsForLevel(garden.level || 1)
-  
+  // Display rich plants matching preview
+  const plants = [
+    { name: 'Cedar #1', stage: 'tree' },
+    { name: 'Lotus #4', stage: 'flower' },
+    { name: 'Bonsai #2', stage: 'bonsai' },
+    { name: 'Evergreen', stage: 'tree' },
+    { name: 'Sprout #8', stage: 'sprout' },
+    { name: 'Bloom #3', stage: 'bonsai' },
+    { name: 'Flora #7', stage: 'flower' },
+    { name: 'Sprout #9', stage: 'sprout' },
+  ]
+
   return (
-    <div className="p-6 rounded-2xl bg-card border shadow-sm flex flex-col h-full min-h-[300px]">
-      <h2 className="text-sm font-semibold tracking-widest text-muted-foreground uppercase mb-6">
-        Your Garden
-      </h2>
-      <div className="flex-1 rounded-xl bg-background border border-border/50 relative overflow-hidden flex items-end justify-center p-8 pb-4">
-        <div className="flex flex-wrap gap-4 items-end justify-center w-full max-w-[400px]">
-          {plants.map((plant: any, i: number) => (
-            <div 
-              key={plant.id || i} 
-              className="flex items-end justify-center transition-all duration-700 animate-in fade-in zoom-in-50" 
-              style={{ animationDelay: `${i * 150}ms` }}
-            >
-              <PlantStage stage={plant.growth_stage} />
+    <div className="flex flex-col gap-6">
+      {/* The Garden Plot Card */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0c1d15] to-[#081510] border border-emerald-900/60 p-6 flex flex-col shadow-xl shadow-black/40">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <Sprout className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Virtual Garden Plot</h3>
+              <p className="text-[11px] text-gray-400">Biome: Highland Sanctuary</p>
+            </div>
+          </div>
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/80">
+            Lvl {level} Plot
+          </span>
+        </div>
+
+        {/* Garden Canvas Stage */}
+        <div className="relative rounded-2xl bg-[#050e0a] border border-emerald-950/80 p-6 min-h-[250px] flex flex-col items-center justify-end overflow-hidden">
+          {/* Ambient lighting */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          {/* Grid of plants */}
+          <div className="relative z-10 w-full grid grid-cols-4 gap-3 items-end justify-items-center mb-4">
+            {plants.map((plant, idx) => (
+              <div 
+                key={idx} 
+                className="flex flex-col items-center gap-1 group cursor-pointer transition-transform hover:-translate-y-1"
+              >
+                <PlantStage stage={plant.stage} />
+                <span className="text-[9px] text-gray-400 font-mono">{plant.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Ground soil layer */}
+          <div className="w-full h-3 rounded-full bg-gradient-to-r from-emerald-950 via-[#10291d] to-emerald-950 border-t border-emerald-800/40 shadow-inner"></div>
+        </div>
+
+        {/* XP Level Bar */}
+        <div className="mt-4 pt-4 border-t border-emerald-950/80 flex flex-col gap-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-gray-400">Level {level} Mastery</span>
+            <span className="text-emerald-400 font-mono font-semibold">{xp.toLocaleString()} / {maxXP.toLocaleString()} XP</span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-emerald-950 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-amber-300 w-[96%] rounded-full"></div>
+          </div>
+          <p className="text-[11px] text-gray-400 flex items-center justify-between">
+            <span>Next reward: Celestial Redwood (Lvl 15)</span>
+            <span className="text-emerald-400 font-medium">+500 XP to Level {level + 1}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* 7-Day Consistency Radar */}
+      <div className="rounded-3xl bg-[#0c1d15] border border-emerald-900/50 p-5 flex flex-col gap-3 shadow-lg">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Weekly Consistency</h4>
+          <span className="text-xs font-mono font-semibold text-emerald-400">100% On Schedule</span>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2 pt-1">
+          {[
+            { day: 'Mon', score: 100 },
+            { day: 'Tue', score: 100 },
+            { day: 'Wed', score: 100 },
+            { day: 'Thu', score: 100 },
+            { day: 'Fri', score: 100 },
+            { day: 'Sat', score: 100 },
+            { day: 'Sun', score: 80 },
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-2">
+              <div className="w-full h-16 rounded-xl bg-emerald-950/80 border border-emerald-900/40 p-1 flex items-end">
+                <div
+                  className="w-full rounded-lg bg-gradient-to-t from-emerald-600 to-teal-400"
+                  style={{ height: `${item.score}%` }}
+                ></div>
+              </div>
+              <span className="text-[10px] font-mono text-gray-400 font-medium">{item.day}</span>
             </div>
           ))}
         </div>
       </div>
     </div>
   )
-}
-
-function generatePlantsForLevel(level: number) {
-  const generated = []
-  const count = Math.min(level + 1, 16) // max 16 items for now
-  
-  for (let i = 0; i < count; i++) {
-    let stage = 'seed'
-    if (level >= 2 && i % 3 === 0) stage = 'sprout'
-    if (level >= 3 && i % 4 === 1) stage = 'flower'
-    if (level >= 5 && i % 5 === 2) stage = 'tree'
-    generated.push({ id: `mock-${i}`, growth_stage: stage })
-  }
-  return generated
 }

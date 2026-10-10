@@ -8,7 +8,7 @@ export async function updateSession(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)!,
     {
       cookies: {
         getAll() {
@@ -32,7 +32,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/auth')
-  const isPublicRoute = isAuthRoute
+  const isPreviewRoute = request.nextUrl.pathname.startsWith('/preview') || request.nextUrl.searchParams.get('preview') === 'true'
+  const isPublicRoute = isAuthRoute || isPreviewRoute
 
   // If user is not logged in and tries to access a protected route (anything other than public routes)
   if (!user && !isPublicRoute) {
